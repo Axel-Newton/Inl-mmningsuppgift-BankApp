@@ -1,0 +1,114 @@
+@page "/CreateAccount"
+
+@inject IAccountService AccountService;
+
+<h3>Please create an account</h3>
+<EditForm Model="_model" OnValidSubmit="CreateAccountAsync">
+    <DataAnnotationsValidator/>
+    <ValidationSummary /> 
+    <div className="mb-2">
+        <label>Account Name</label>
+        <InputText @bind-Value="_model.Name"/>
+    </div>
+    <div className="mb-2">
+        <label>Account Type</label>
+        <InputSelect @bind-Value="_model.AccountType">
+            <option value="">Choose Account Type:</option>
+            <option value="@AccountType.Deposit">Base Account</option>
+            <option value="@AccountType.Savings">Savings Account</option>
+        </InputSelect>
+    </div>
+    
+    <div className="mb-2">
+        <label>Currency</label>
+        <InputText @bind-Value="_model.Currency"></InputText>
+    </div>
+    
+    <div className="mb-2">
+        <label>Start Balance</label>
+        <InputNumber @bind-Value="_model.InitialBalance"></InputNumber>
+    </div>
+    
+    <button type="submit">Create Account</button> 
+    
+    
+    </EditForm >
+
+<button class="btn btn-primary" @onclick="GetAccounts">Get Accounts</button>
+    
+@if (showAccounts)
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Currency</th>
+            <th>Balance</th>
+        </tr>
+        </thead>
+        <tbody>
+        @{
+            var accountsList = AccountService.GetAccounts();
+        }
+
+        @foreach (var accounts in accountsList)
+        {
+            <tr>
+                <td>@accounts.Name</td>
+                <td>@accounts.AccountType</td>
+                <td>@accounts.Currency</td>
+                <td>@accounts.Balance</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+
+@code{
+    private readonly CreateAccountModel _model = new();
+
+    private bool showAccounts = false; 
+    
+    private void GetAccounts()
+    {
+        var accounts = AccountService.GetAccounts();
+        showAccounts = true;
+    }
+    
+    private Task CreateAccountAsync()
+    {
+        try
+        {
+            AccountService.CreateAccount(
+                _model.Name,
+                _model.AccountType,
+                _model.Currency,
+                _model.InitialBalance);
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+        return Task.CompletedTask;
+    }
+    
+    
+    private class CreateAccountModel
+    {
+        public string? Name { get; set; } 
+        public AccountType AccountType { get; set; }
+        public string? Currency { get; set; }
+        public decimal InitialBalance { get; set; } = 0;
+
+        public void Clear()
+        {
+            Name = string.Empty;
+            AccountType = AccountType.Deposit;
+            Currency = "SEK";
+            InitialBalance = 0;
+        }
+    }
+}
