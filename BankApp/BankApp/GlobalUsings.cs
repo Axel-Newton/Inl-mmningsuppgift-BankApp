@@ -1,0 +1,1 @@
+global using BankApp.Interfaces;
