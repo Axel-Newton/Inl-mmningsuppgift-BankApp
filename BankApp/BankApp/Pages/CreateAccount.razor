@@ -35,8 +35,10 @@
     </EditForm >
 
 <button class="btn btn-primary" @onclick="GetAccounts">Get Accounts</button>
-    
-@if (showAccounts)
+
+<h4>All Accounts</h4>
+
+@if (_showAccounts)
 {
     <table class="table">
         <thead>
@@ -45,6 +47,7 @@
             <th>Type</th>
             <th>Currency</th>
             <th>Balance</th>
+            <th>Last Updated</th>
         </tr>
         </thead>
         <tbody>
@@ -59,6 +62,7 @@
                 <td>@accounts.AccountType</td>
                 <td>@accounts.Currency</td>
                 <td>@accounts.Balance</td>
+                <td>@accounts.LastUpdated.ToLocalTime()</td>
             </tr>
         }
         </tbody>
@@ -69,12 +73,12 @@
 @code{
     private readonly CreateAccountModel _model = new();
 
-    private bool showAccounts = false; 
+    private bool _showAccounts = false; 
     
     private void GetAccounts()
     {
         var accounts = AccountService.GetAccounts();
-        showAccounts = true;
+        _showAccounts = true;
     }
     
     private Task CreateAccountAsync()
@@ -86,6 +90,8 @@
                 _model.AccountType,
                 _model.Currency,
                 _model.InitialBalance);
+            
+            _model.Clear();
         }
         catch (Exception exception)
         {
