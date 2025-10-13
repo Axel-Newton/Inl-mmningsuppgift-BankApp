@@ -21,7 +21,13 @@
     
     <div className="mb-2">
         <label>Currency</label>
-        <InputText @bind-Value="_model.Currency"></InputText>
+        <InputSelect @bind-Value="_model.Currency">
+            <option value="">Choose Currency:</option>
+            @foreach (var currency in _currencies)
+            {
+                <option value="@currency">@currency</option>
+            }
+        </InputSelect>
     </div>
     
     <div className="mb-2">
@@ -73,6 +79,8 @@
 @code{
     private readonly CreateAccountModel _model = new();
 
+    private readonly List<string> _currencies = new() { "SEK", "USD", "EURO" };
+    
     private bool _showAccounts = false; 
     
     private void GetAccounts()
