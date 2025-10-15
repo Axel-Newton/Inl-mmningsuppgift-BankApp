@@ -4,15 +4,15 @@ namespace BankApp.Services;
 
 public class AccountService : IAccountService
 {
-    public IBankAccount CreateAccount(string name, string currency, decimal initialBalance)
-    {
-        return new BankAccount();
-    }
-
     private readonly List<IBankAccount> _accounts = new();
-    
-    public List<IBankAccount> GetAccounts()
+
+    public IBankAccount CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
     {
-        return _accounts;
+        var account = new BankAccount(name, accountType, currency, initialBalance);
+        _accounts.Add(account);
+        return account;
     }
+    
+    public List<IBankAccount> GetAccounts() => _accounts;
+    
 }
