@@ -54,6 +54,7 @@
             <th>Currency</th>
             <th>Balance</th>
             <th>Last Updated</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -69,6 +70,9 @@
                 <td>@accounts.Currency</td>
                 <td>@accounts.Balance</td>
                 <td>@accounts.LastUpdated.ToLocalTime()</td>
+                <td>
+                <button class="btn-danger" @onclick="() => DeleteAccountAsync(accounts.Id)">Delete Account</button>
+                </td>
             </tr>
         }
         </tbody>
@@ -125,4 +129,18 @@
             InitialBalance = 0;
         }
     }
+
+    private async Task DeleteAccountAsync(Guid accountId)
+    {
+        try
+        {
+            await AccountService.DeleteAccountAsync(accountId);
+            GetAccounts();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Error deleting account: {exception.Message}");
+        }
+    }
+    
 }
