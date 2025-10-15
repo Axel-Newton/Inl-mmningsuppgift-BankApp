@@ -1,5 +1,3 @@
-using BankApp.Domain;
-
 namespace BankApp.Services;
 
 public class AccountService : IAccountService
@@ -14,5 +12,14 @@ public class AccountService : IAccountService
     }
     
     public List<IBankAccount> GetAccounts() => _accounts;
-    
+
+    public async Task DeleteAccountAsync(Guid accountId)
+    {
+        var account = _accounts.FirstOrDefault(x => x.Id == accountId);
+        if (account != null)
+        {
+            _accounts.Remove(account);
+        }
+        await Task.CompletedTask;
+    }
 }
