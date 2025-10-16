@@ -17,6 +17,7 @@
         public DateTime TimeStamp { get; set; }
         public TransactionType TransactionType { get; set; } 
         public string Description { get; set; }
+        
 
         public Transaction(Guid fromAccountId, Guid toAccountId, decimal amount, DateTime timeStamp, string description, TransactionType transactionType)
         {
