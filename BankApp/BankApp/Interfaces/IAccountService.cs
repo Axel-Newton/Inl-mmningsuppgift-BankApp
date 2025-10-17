@@ -8,4 +8,5 @@ public interface IAccountService
     Task<List<BankAccount>> GetAllAccounts();
     Task<BankAccount?> GetAccountById(Guid accountId);
     Task UpdateAccount(BankAccount account);
+    void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount);
 }

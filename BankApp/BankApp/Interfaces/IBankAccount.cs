@@ -16,4 +16,6 @@ public interface IBankAccount
     
     void Withdraw(decimal amount, Guid toAccountId,  Guid fromAccountId, string description, TransactionType transactionType);
     void Deposit(decimal amount, Guid toAccountId,  Guid fromAccountId, string description, TransactionType transactionType);
+    public void TransferTo(BankAccount toAccount, decimal amount);
+
 }

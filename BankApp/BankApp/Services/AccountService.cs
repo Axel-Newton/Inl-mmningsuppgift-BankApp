@@ -45,4 +45,15 @@ public class AccountService : IAccountService
         }
         await Task.CompletedTask;
     }
+
+    public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
+    {
+        var fromAccount = _accounts.OfType<BankAccount>().FirstOrDefault(x => x.Id == fromAccountId)
+            ?? throw new KeyNotFoundException($"Account with ID {fromAccountId} not found");
+        
+        var toAccount = _accounts.OfType<BankAccount>().FirstOrDefault(x => x.Id == toAccountId)
+            ?? throw new KeyNotFoundException($"Account with ID {toAccountId} not found");
+        
+        fromAccount.TransferTo(toAccount, amount);
+    }
 }
