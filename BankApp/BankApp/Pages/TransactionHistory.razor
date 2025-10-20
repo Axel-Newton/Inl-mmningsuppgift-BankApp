@@ -8,11 +8,13 @@
 <table class="table">
     <thead>
     <tr>
-        <th>Time</th>
-        <th>Type</th>
         <th>Account</th>
+        <th>Type</th>
         <th>Amount</th>
         <th>Currency</th>
+        <th>To/From Account</th>
+        <th>Amount After</th>
+        <th>Time</th>
     </tr>
     </thead>
     <tbody>
@@ -21,12 +23,15 @@
     @foreach (var t in _transactions)
     {
         <tr>
-            <td>@t.Time.ToLocalTime()</td>
-            <td>@t.Type</td>
             <td>@t.AccountName</td>
+            <td>@t.Type</td>
             <td>@(t.Type == TransactionType.Withdraw ? "-" : "+")@t.Amount</td>
             <td>@t.Currency</td>
-            
+            <td>@t.ToAccount</td>
+            <td>@t.AmountAfter</td>
+            <td>@t.Time.ToLocalTime()</td>
+
+
         </tr>
     }
     </tbody>
@@ -46,6 +51,8 @@
                 AccountName = acc.Name,
                 Amount = t.Amount,
                 Currency = acc.Currency,
+                AmountAfter = acc.Balance,
+                ToAccount = t.ToAccountId
                 
                
             }))
@@ -60,5 +67,7 @@
         public string AccountName { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; }
+        public decimal AmountAfter { get; set; }
+        public Guid? ToAccount { get; set; }
     }
 }
