@@ -1,5 +1,8 @@
 using Microsoft.JSInterop;
 using System.Text.Json;
+using BankApp.Domain;
+
+namespace BankApp.Services;
 
 public class LocalStorageService : IStorageService
 {
@@ -13,16 +16,19 @@ public class LocalStorageService : IStorageService
 
     public async Task SaveAccountsAsync(List<IBankAccount> accounts) //Saves accounts to local storage
     {
-        var json = JsonSerializer.Serialize(accounts);
+        var bankAccounts = accounts.OfType<BankAccount>().ToList();
+        var json = JsonSerializer.Serialize(bankAccounts);
         await _js.InvokeVoidAsync("localStorage.setItem", StorageKey, json);
     }
 
     public async Task<List<IBankAccount>> LoadAccountsAsync() //method that retrieves list of bank accounts stored in browser
     {
         var json = await _js.InvokeAsync<string>("localStorage.getItem", StorageKey);
-        return json is null
-            ? new List<IBankAccount>()
-            : JsonSerializer.Deserialize<List<IBankAccount>>(json) ?? new List<IBankAccount>();
+        if (string.IsNullOrEmpty(json))
+            return new List<IBankAccount>();
+        
+        var bankAccounts = JsonSerializer.Deserialize<List<BankAccount>>(json) ?? new List<BankAccount>();
+        return bankAccounts.Cast<IBankAccount>().ToList();
     }
 
     public async Task DeleteAccount(Guid accountId) //method that deletes a specific bank account
