@@ -2,6 +2,7 @@ namespace BankApp.Services;
 
 public class AccountService : IAccountService
 {
+    private const string StorageKey = "accounts";
     private readonly IStorageService _storageService;
     private List<IBankAccount> _accounts = new();
     private bool _isInitialized = false;
@@ -18,18 +19,18 @@ public class AccountService : IAccountService
         _isInitialized = true;
     }
 
-    public IBankAccount CreateAccount(string name, AccountType accountType, string currency, decimal initialBalance)
+    public async Task<IBankAccount> CreateAccountAsync(string name, AccountType accountType, string currency, decimal initialBalance)
     {
-        EnsureInitializedAsync().Wait();
+        await EnsureInitializedAsync();
         var account = new BankAccount(name, accountType, currency, initialBalance);
         _accounts.Add(account);
-        _storageService.SaveAccountsAsync(_accounts).Wait();
+        await _storageService.SaveAccountsAsync(_accounts);
         return account;
     }
     
-    public List<IBankAccount> GetAccounts()
+    public async Task<List<IBankAccount>> GetAccountsAsync()
     {
-        EnsureInitializedAsync().Wait();
+        await EnsureInitializedAsync();
         return _accounts;
     }
 
@@ -48,14 +49,14 @@ public class AccountService : IAccountService
     {
         await EnsureInitializedAsync();
         var account = _accounts.OfType<BankAccount>().FirstOrDefault(x => x.Id == accountId);
-        return await Task.FromResult(account);
+        return account;
     }
 
     public async Task<List<BankAccount>> GetAllAccounts()
     {
         await EnsureInitializedAsync();
         var bankAccounts = _accounts.OfType<BankAccount>().ToList();
-        return await Task.FromResult(bankAccounts);
+        return bankAccounts;
     }
 
     public async Task UpdateAccount(BankAccount account)
@@ -70,9 +71,9 @@ public class AccountService : IAccountService
         }
     }
 
-    public void Transfer(Guid fromAccountId, Guid toAccountId, decimal amount)
+    public async Task TransferAsync(Guid fromAccountId, Guid toAccountId, decimal amount)
     {
-        EnsureInitializedAsync().Wait();
+        await EnsureInitializedAsync();
         var fromAccount = _accounts.OfType<BankAccount>().FirstOrDefault(x => x.Id == fromAccountId)
             ?? throw new KeyNotFoundException($"Account with ID {fromAccountId} not found");
         
@@ -80,6 +81,6 @@ public class AccountService : IAccountService
             ?? throw new KeyNotFoundException($"Account with ID {toAccountId} not found");
         
         fromAccount.TransferTo(toAccount, amount);
-        _storageService.SaveAccountsAsync(_accounts).Wait();
+        await _storageService.SaveAccountsAsync(_accounts);
     }
 }

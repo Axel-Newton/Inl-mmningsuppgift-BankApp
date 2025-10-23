@@ -5,7 +5,7 @@
 <h3>Please create an account</h3>
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync">
     <DataAnnotationsValidator/>
-    <ValidationSummary /> 
+    <ValidationSummary />
     <div className="mb-2">
         <label>Account Name</label>
         <InputText @bind-Value="_model.Name"/>
@@ -18,7 +18,7 @@
             <option value="@AccountType.Savings">Savings Account</option>
         </InputSelect>
     </div>
-    
+
     <div className="mb-2">
         <label>Currency</label>
         <InputSelect @bind-Value="_model.Currency">
@@ -29,18 +29,16 @@
             }
         </InputSelect>
     </div>
-    
+
     <div className="mb-2">
         <label>Start Balance</label>
         <InputNumber @bind-Value="_model.InitialBalance"></InputNumber>
     </div>
-    
-    <button type="submit">Create Account</button> 
-    
-    
-    </EditForm >
 
-<button class="btn btn-primary" @onclick="GetAccounts">Get Accounts</button>
+    <button type="submit">Create Account</button>
+</EditForm>
+
+<button class="btn btn-primary" @onclick="GetAccountsAsync">Get Accounts</button>
 
 <h4>All Accounts</h4>
 
@@ -58,10 +56,6 @@
         </tr>
         </thead>
         <tbody>
-        @{
-            var accountsList = AccountService.GetAccounts();
-        }
-
         @foreach (var accounts in accountsList)
         {
             <tr>
@@ -79,30 +73,30 @@
     </table>
 }
 
-
 @code{
     private readonly CreateAccountModel _model = new();
 
     private readonly List<string> _currencies = new() { "SEK", "USD", "EURO" };
-    
-    private bool _showAccounts = false; 
-    
-    private void GetAccounts()
+
+    private bool _showAccounts = false;
+    private List<IBankAccount> accountsList = new();
+
+    private async Task GetAccountsAsync()
     {
-        var accounts = AccountService.GetAccounts();
+        accountsList = await AccountService.GetAccountsAsync();
         _showAccounts = true;
     }
-    
-    private Task CreateAccountAsync()
+
+    private async Task CreateAccountAsync()
     {
         try
         {
-            AccountService.CreateAccount(
+            await AccountService.CreateAccountAsync(
                 _model.Name,
                 _model.AccountType,
                 _model.Currency,
                 _model.InitialBalance);
-            
+
             _model.Clear();
         }
         catch (Exception exception)
@@ -110,13 +104,24 @@
             Console.WriteLine(exception);
             throw;
         }
-        return Task.CompletedTask;
     }
-    
-    
+
+    private async Task DeleteAccountAsync(Guid accountId)
+    {
+        try
+        {
+            await AccountService.DeleteAccountAsync(accountId);
+            await GetAccountsAsync();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Error deleting account: {exception.Message}");
+        }
+    }
+
     private class CreateAccountModel
     {
-        public string? Name { get; set; } 
+        public string? Name { get; set; }
         public AccountType AccountType { get; set; }
         public string? Currency { get; set; }
         public decimal InitialBalance { get; set; } = 0;
@@ -129,18 +134,4 @@
             InitialBalance = 0;
         }
     }
-
-    private async Task DeleteAccountAsync(Guid accountId)
-    {
-        try
-        {
-            await AccountService.DeleteAccountAsync(accountId);
-            GetAccounts();
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine($"Error deleting account: {exception.Message}");
-        }
-    }
-    
 }
