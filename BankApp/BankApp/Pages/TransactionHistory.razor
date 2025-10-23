@@ -51,21 +51,22 @@ else
             <tbody>
                 @foreach (var transaction in sortedTransaction())
                 {
-                    <td>@transaction.TimeStamp</td>
-                    <td>@transaction.Amount</td>
-                    <td>@transaction.TransactionType</td>
-                    <td>@transaction.BalanceAfter</td>
-                    <td>
-                        @if (@transaction.FromAccountId.HasValue)
-                        {
-                            @transaction.FromAccountId
-                        }
-                        else
-                        {
-                            <p>Unknown</p>
-                        }
-                    </td>
-
+                    <tr>
+                        <td>@transaction.TimeStamp.ToLocalTime().ToString("yyyy-M-d dddd")</td>
+                        <td>@transaction.Amount</td>
+                        <td>@transaction.TransactionType</td>
+                        <td>@transaction.BalanceAfter</td>
+                        <td>
+                            @if (@transaction.FromAccountId.HasValue)
+                            {
+                                <span>@(transaction.FromAccountId.ToString()[..6]) -> @(transaction.ToAccountId.ToString()[..6])</span>
+                            }
+                            else
+                            {
+                                <p>Unknown</p>
+                            }
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
