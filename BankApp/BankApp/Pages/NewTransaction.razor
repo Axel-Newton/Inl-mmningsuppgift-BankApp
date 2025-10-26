@@ -1,71 +1,91 @@
 ﻿@page "/NewTransaction"
-@using Bankapp.Domain
+@using BankApp.Domain
 @inject IAccountService AccountService
 @inject NavigationManager Navigation
 
 <h3>New Transaction</h3>
 
-<div class="card p-4">
-    <div class="form-group mb-3">
-        <label for="account">Account:</label>
-        <select id="account" class="form-control" @bind="selectedAccountId">
-            <option value="">-- Select Account --</option>
-            @foreach (var acc in accounts)
-            {
-                <option value="@acc.Id">@acc.Name (@acc.Currency)</option>
-            }
-        </select>
+@if (_accounts.Count == 0)
+{
+    <p>No accounts available. Create an account first.</p>
+}
+else
+{
+    <div class="card p-4">
+        <div class="form-group mb-3">
+            <label for="account">Account:</label>
+            <select id="account" class="form-control" @bind="_selectedAccountId">
+                <option value="@Guid.Empty">-- Select Account --</option>
+                @foreach (var acc in _accounts)
+                {
+                    <option value="@acc.Id">@acc.Name (@acc.Currency)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="type">Transaction Type:</label>
+            <select id="type" class="form-control" @bind="_transactionType">
+                <option value="@TransactionType.Deposit">Deposit</option>
+                <option value="@TransactionType.Withdraw">Withdraw</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="amount">Amount:</label>
+            <input id="amount" class="form-control" @bind="_amount" type="number" step="0.01"/>
+        </div>
+
+        <button class="btn btn-primary" @onclick="SubmitTransaction">Submit</button>
+
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@_errorMessage</div>
+        }
     </div>
-
-    <div class="form-group mb-3">
-        <label for="type">Transaction Type:</label>
-        <select id="type" class="form-control" @bind="transactionType">
-            <option value="@TransactionType.Deposit">Deposit</option>
-            <option value="@TransactionType.Withdraw">Withdraw</option>
-        </select>
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="amount">Amount:</label>
-        <input id="amount" class="form-control" @bind="amount" type="number" step="0.01"/>
-    </div>
-
-    <button class="btn btn-primary" @onclick="SubmitTransaction">Submit</button>
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="alert alert-danger mt-3">@errorMessage</div>
-    }
-</div>
+}
 
 @code {
-    private List<BankAccount> accounts = new();
-    private Guid selectedAccountId;
-    private TransactionType transactionType = TransactionType.Deposit;
-    private decimal amount;
-    private string errorMessage = string.Empty;
+    private List<IBankAccount> _accounts = new();
+    private Guid _selectedAccountId = Guid.Empty;
+    private TransactionType _transactionType = TransactionType.Deposit;
+    private decimal _amount;
+    private string _errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        accounts = await AccountService.GetAllAccounts();
+        _accounts = await AccountService.GetAccountsAsync();
     }
-    
-    
+
     private async Task SubmitTransaction()
     {
-        var account = accounts.FirstOrDefault(a => a.Id == selectedAccountId);
+        _errorMessage = string.Empty;
+
+        if (_selectedAccountId == Guid.Empty)
+        {
+            _errorMessage = "Please select an account.";
+            return;
+        }
+
+        var account = _accounts.FirstOrDefault(a => a.Id == _selectedAccountId);
         if (account == null)
         {
-            errorMessage = "Please select an account.";
+            _errorMessage = "Selected account could not be found.";
+            return;
+        }
+
+        if (_amount <= 0)
+        {
+            _errorMessage = "Amount must be greater than zero.";
             return;
         }
 
         try
         {
-            if (transactionType == TransactionType.Deposit)
+            if (_transactionType == TransactionType.Deposit)
             {
                 account.Deposit(
-                    amount,
+                    _amount,
                     toAccountId: account.Id,
                     fromAccountId: Guid.Empty,
                     description: "Deposit",
@@ -75,7 +95,7 @@
             else
             {
                 account.Withdraw(
-                    amount,
+                    _amount,
                     toAccountId: Guid.Empty,
                     fromAccountId: account.Id,
                     description: "Withdraw",
@@ -83,12 +103,18 @@
                 );
             }
 
-            await AccountService.UpdateAccount(account);
-            Navigation.NavigateTo($"../TransactionHistory");
+            await AccountService.UpdateAccount((BankAccount)account);
+            Navigation.NavigateTo($"/TransactionHistory");
         }
         catch (ArgumentException exception)
         {
-            errorMessage = exception.Message;
+            _errorMessage = exception.Message;
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "An unexpected error occurred: " + ex.Message;
+            Console.WriteLine(ex);
         }
     }
+
 }

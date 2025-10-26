@@ -2,10 +2,9 @@ namespace BankApp.Services;
 
 public class AccountService : IAccountService
 {
-    private const string StorageKey = "accounts";
     private readonly IStorageService _storageService;
     private List<IBankAccount> _accounts = new();
-    private bool _isInitialized = false;
+    private bool _isInitialized;
 
     public AccountService(IStorageService storageService)
     {

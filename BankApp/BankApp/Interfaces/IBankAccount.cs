@@ -1,5 +1,5 @@
 namespace BankApp.Interfaces;
-using Bankapp.Domain;
+using BankApp.Domain;
 /// <summary>
 /// Interface containing the BankAccount methods
 /// </summary>

@@ -1,6 +1,6 @@
 @page "/CreateAccount"
 
-@inject IAccountService AccountService;
+@inject IAccountService AccountService
 
 <h3>Please create an account</h3>
 <EditForm Model="_model" OnValidSubmit="CreateAccountAsync">
@@ -39,6 +39,15 @@
 </EditForm>
 
 <button class="btn btn-primary" @onclick="GetAccountsAsync">Get Accounts</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-2">@errorMessage</div>
+}
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success mt-2">@successMessage</div>
+}
 
 <h4>All Accounts</h4>
 
@@ -81,6 +90,9 @@
     private bool _showAccounts = false;
     private List<IBankAccount> accountsList = new();
 
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
     private async Task GetAccountsAsync()
     {
         accountsList = await AccountService.GetAccountsAsync();
@@ -89,6 +101,8 @@
 
     private async Task CreateAccountAsync()
     {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
         try
         {
             await AccountService.CreateAccountAsync(
@@ -98,11 +112,16 @@
                 _model.InitialBalance);
 
             _model.Clear();
+            successMessage = "Account created successfully.";
+
+            // Refresh the displayed account list
+            await GetAccountsAsync();
         }
         catch (Exception exception)
         {
+            // show friendly error to the user instead of rethrowing
+            errorMessage = $"Unable to create account: {exception.Message}";
             Console.WriteLine(exception);
-            throw;
         }
     }
 
@@ -116,14 +135,15 @@
         catch (Exception exception)
         {
             Console.WriteLine($"Error deleting account: {exception.Message}");
+            errorMessage = $"Error deleting account: {exception.Message}";
         }
     }
 
     private class CreateAccountModel
     {
-        public string? Name { get; set; }
-        public AccountType AccountType { get; set; }
-        public string? Currency { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public AccountType AccountType { get; set; } = AccountType.Deposit;
+        public string Currency { get; set; } = "SEK";
         public decimal InitialBalance { get; set; } = 0;
 
         public void Clear()

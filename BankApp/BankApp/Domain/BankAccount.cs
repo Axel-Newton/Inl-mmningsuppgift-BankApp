@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Bankapp.Domain;
 
 namespace BankApp.Domain;
 
@@ -37,14 +36,19 @@ public class BankAccount : IBankAccount
         Balance -= amount;
         LastUpdated = DateTime.Now;
 
-        Transactions.Add(new Transaction(
+        var tx = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
             DateTime.Now,
             description,
             TransactionType.Withdraw
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+
+        Transactions.Add(tx);
     }
 
     public void Deposit(decimal amount, Guid toAccountId, Guid fromAccountId, string description,
@@ -54,21 +58,26 @@ public class BankAccount : IBankAccount
         Balance += amount;
         LastUpdated = DateTime.Now;
 
-        Transactions.Add(new Transaction(
+        var tx = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
             DateTime.Now,
             description,
             TransactionType.Deposit
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+
+        Transactions.Add(tx);
     }
 
     public void TransferTo(BankAccount toAccount, decimal amount)
     {
         Balance -= amount;
         LastUpdated = DateTime.Now;
-        Transactions.Add(new Transaction
+        var txOut = new Transaction
         (
             Id,
             toAccount.Id,
@@ -76,19 +85,26 @@ public class BankAccount : IBankAccount
             DateTime.Now,
             "Transfer",
             TransactionType.TransferOut
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+        Transactions.Add(txOut);
 
         toAccount.Balance += amount;
         toAccount.LastUpdated = DateTime.UtcNow;
-        toAccount.Transactions.Add(new Transaction(
+        var txIn = new Transaction(
             Id,
             toAccount.Id,
             amount,
             DateTime.Now,
             "Transfer",
             TransactionType.TransferIn
-        ));
-
+        )
+        {
+            BalanceAfter = toAccount.Balance
+        };
+        toAccount.Transactions.Add(txIn);
 
         /*
         public void TransferTo(BankAccount toAccount, decimal amount)

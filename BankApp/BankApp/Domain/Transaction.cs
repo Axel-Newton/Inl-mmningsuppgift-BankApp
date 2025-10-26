@@ -1,4 +1,4 @@
-﻿﻿namespace Bankapp.Domain
+﻿namespace BankApp.Domain
 {
     public enum TransactionType
     {
@@ -35,4 +35,3 @@
         }
     }
 }
-
