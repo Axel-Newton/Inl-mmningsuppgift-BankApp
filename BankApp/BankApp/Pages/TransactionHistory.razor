@@ -24,10 +24,10 @@ else
     
     <div class="mb-2">
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
-            Sort by date @(currentKey == SortKey.Date ? (descending ? "up" : "down") : "")
+            Sort by date @(currentKey == SortKey.Date ? (descending ? "↑" : "↓") : "")
         </button>
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Amount)">
-            Sort by amount @(currentKey == SortKey.Amount ? (descending ? "up" : "down") : "")
+            Sort by amount @(currentKey == SortKey.Amount ? (descending ? "↑" : "↓") : "")
         </button>
     </div>
     
