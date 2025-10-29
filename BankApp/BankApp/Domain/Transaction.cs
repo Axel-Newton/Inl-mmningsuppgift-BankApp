@@ -19,11 +19,13 @@
         public string Description { get; set; } = string.Empty;
         public decimal BalanceAfter { get; set; }
         
-        // Parameterless constructor for JSON deserialization
+        //Parametarlös konstruktor för JSON deserialization
         public Transaction()
         {
         }
-
+        
+        
+        //Konstruktor för Transaction klassen
         public Transaction(Guid fromAccountId, Guid toAccountId, decimal amount, DateTime timeStamp, string description, TransactionType transactionType)
         {
             FromAccountId = fromAccountId;

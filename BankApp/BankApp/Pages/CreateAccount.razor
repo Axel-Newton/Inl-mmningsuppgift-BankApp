@@ -42,11 +42,11 @@
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-danger mt-2">@errorMessage</div>
+    <div class="alert alert-danger mt-2">@errorMessage</div>  //Skriver ut error message om det finns
 }
-@if (!string.IsNullOrEmpty(successMessage))
+@if (!string.IsNullOrEmpty(successMessage)) 
 {
-    <div class="alert alert-success mt-2">@successMessage</div>
+    <div class="alert alert-success mt-2">@successMessage</div> //Skriver ut success message om det finns
 }
 
 <h4>All Accounts</h4>
@@ -93,7 +93,7 @@
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
 
-    private async Task GetAccountsAsync()
+    private async Task GetAccountsAsync() //Hämtar konton
     {
         accountsList = await AccountService.GetAccountsAsync();
         _showAccounts = true;
@@ -114,12 +114,12 @@
             _model.Clear();
             successMessage = "Account created successfully.";
 
-            // Refresh the displayed account list
+            // Refreshar displayade konton
             await GetAccountsAsync();
         }
         catch (Exception exception)
         {
-            // show friendly error to the user instead of rethrowing
+            // visar error till användaren istället för rethrow
             errorMessage = $"Unable to create account: {exception.Message}";
             Console.WriteLine(exception);
         }
@@ -146,7 +146,7 @@
         public string Currency { get; set; } = "SEK";
         public decimal InitialBalance { get; set; } = 0;
 
-        public void Clear()
+        public void Clear() //Metod som clearar anvöndarens input och val 
         {
             Name = string.Empty;
             AccountType = AccountType.Deposit;

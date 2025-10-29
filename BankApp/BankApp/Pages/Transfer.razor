@@ -84,9 +84,9 @@ else
             {
                 await AccountService.TransferAsync(_model.FromAccountId, _model.ToAccountId, _model.Amount);
 
-                // Update list
+                // Uppdaterar lista
                 _accounts = await AccountService.GetAccountsAsync();
-
+                
                 var from = _accounts.First(x => x.Id == _model.FromAccountId);
                 var to = _accounts.First(x => x.Id == _model.ToAccountId);
 
