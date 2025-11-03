@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Bankapp.Domain;
 
 namespace BankApp.Domain;
 
@@ -7,16 +6,19 @@ public class BankAccount : IBankAccount
 
 {
     public TransactionType TransactionType { get; set; }
-    public List<Transaction> Transactions => _transactions;
+    public List<Transaction> Transactions { get; set; } = new List<Transaction>();
 
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public string Name { get; private set; }
-    public AccountType AccountType { get; private set; }
-    public string Currency { get; private set; }
-    public decimal Balance { get; private set; }
-    public DateTime LastUpdated { get; private set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = string.Empty;
+    public AccountType AccountType { get; set; }
+    public string Currency { get; set; } = string.Empty;
+    public decimal Balance { get; set; }
+    public DateTime LastUpdated { get; set; }
 
-    private readonly List<Transaction> _transactions = new List<Transaction>();
+    // Parameterless constructor for JSON deserialization
+    public BankAccount()
+    {
+    }
 
     public BankAccount(string name, AccountType accountType, string currency, decimal initialBalance)
     {
@@ -34,14 +36,19 @@ public class BankAccount : IBankAccount
         Balance -= amount;
         LastUpdated = DateTime.Now;
 
-        _transactions.Add(new Transaction(
+        var tx = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
             DateTime.Now,
             description,
             TransactionType.Withdraw
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+
+        Transactions.Add(tx);
     }
 
     public void Deposit(decimal amount, Guid toAccountId, Guid fromAccountId, string description,
@@ -51,21 +58,26 @@ public class BankAccount : IBankAccount
         Balance += amount;
         LastUpdated = DateTime.Now;
 
-        _transactions.Add(new Transaction(
+        var tx = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
             DateTime.Now,
             description,
             TransactionType.Deposit
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+
+        Transactions.Add(tx);
     }
 
     public void TransferTo(BankAccount toAccount, decimal amount)
     {
         Balance -= amount;
         LastUpdated = DateTime.Now;
-        _transactions.Add(new Transaction
+        var txOut = new Transaction
         (
             Id,
             toAccount.Id,
@@ -73,19 +85,26 @@ public class BankAccount : IBankAccount
             DateTime.Now,
             "Transfer",
             TransactionType.TransferOut
-        ));
+        )
+        {
+            BalanceAfter = Balance
+        };
+        Transactions.Add(txOut);
 
         toAccount.Balance += amount;
         toAccount.LastUpdated = DateTime.UtcNow;
-        toAccount._transactions.Add(new Transaction(
+        var txIn = new Transaction(
             Id,
             toAccount.Id,
             amount,
             DateTime.Now,
             "Transfer",
             TransactionType.TransferIn
-        ));
-
+        )
+        {
+            BalanceAfter = toAccount.Balance
+        };
+        toAccount.Transactions.Add(txIn);
 
         /*
         public void TransferTo(BankAccount toAccount, decimal amount)

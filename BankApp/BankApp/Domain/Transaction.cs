@@ -1,4 +1,4 @@
-﻿namespace Bankapp.Domain
+﻿namespace BankApp.Domain
 {
     public enum TransactionType
     {
@@ -10,16 +10,22 @@
     
     public class Transaction
     {
-        public Guid Id { get; set; } =Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid? FromAccountId { get; set; }
         public Guid? ToAccountId { get; set; }
         public decimal Amount { get; set; }
         public DateTime TimeStamp { get; set; }
         public TransactionType TransactionType { get; set; } 
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public decimal BalanceAfter { get; set; }
         
-
+        //Parametarlös konstruktor för JSON deserialization
+        public Transaction()
+        {
+        }
+        
+        
+        //Konstruktor för Transaction klassen
         public Transaction(Guid fromAccountId, Guid toAccountId, decimal amount, DateTime timeStamp, string description, TransactionType transactionType)
         {
             FromAccountId = fromAccountId;
@@ -29,16 +35,5 @@
             Description = description;
             TransactionType = transactionType;
         }
-
-        public Transaction()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Transaction(Guid fromAccountId, Guid toAccountId, decimal amount, DateTime timeStamp, TransactionType transferOut)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
-
