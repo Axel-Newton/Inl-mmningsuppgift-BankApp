@@ -8,6 +8,11 @@
 }
 else
 {
+    @if (!string.IsNullOrEmpty(_errorMessage)) //Skriver ut errormessage
+    {
+        <div class="alert alert-danger">@_errorMessage</div>
+    }
+    
     <EditForm Model="_model" OnValidSubmit="OnSubmitAsync">
         <DataAnnotationsValidator/>
         <ValidationSummary/>
@@ -62,7 +67,8 @@ else
     private readonly TransferFormModel _model = new();
     private List<IBankAccount> _accounts = new();
     private List<IBankAccount> _toAccounts = new();
-
+    private string? _errorMessage;
+    
     private class TransferFormModel
     {
         public Guid FromAccountId { get; set; }
@@ -78,6 +84,15 @@ else
 
     private async Task OnSubmitAsync()
     {
+        _errorMessage = null;
+
+        if (_model.Amount < 0)
+        {
+            _errorMessage = "Transfer amount can't be negative";
+            StateHasChanged();
+            return;
+        }
+        
         if (_model.FromAccountId != Guid.Empty)
         {
             try
