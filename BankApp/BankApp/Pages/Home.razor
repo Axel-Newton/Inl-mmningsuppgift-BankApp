@@ -1,7 +1,72 @@
 ﻿@page "/"
-
+@inject IAccountService AccountService
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Home</h1>
 
-Welcome to your new app.
+<h3>Accounts:</h3>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Currency</th>
+        <th>Balance</th>
+        <th>Last Updated</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var accounts in _accountsList)
+    {
+        <tr>
+            <td>@accounts.Name</td>
+            <td>@accounts.AccountType</td>
+            <td>@accounts.Currency</td>
+            <td>@accounts.Balance</td>
+            <td>@accounts.LastUpdated.ToLocalTime()</td>
+            <td>
+                <button class="btn-danger" @onclick="() => DeleteAccountAsync(accounts.Id)">Delete Account</button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger mt-2">@_errorMessage</div>  //Skriver ut error message om det finns
+}
+
+@code{
+    
+    private List<IBankAccount> _accountsList = new();
+    private string? _errorMessage;
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _accountsList = await AccountService.GetAccountsAsync();
+    }
+    
+    private async Task GetAccountsAsync() //Hämtar konton
+    {
+        _accountsList = await AccountService.GetAccountsAsync(); 
+    }
+    
+    private async Task DeleteAccountAsync(Guid accountId)
+    {
+        try
+        {
+            await AccountService.DeleteAccountAsync(accountId);
+            await GetAccountsAsync();
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"Error deleting account: {exception.Message}");
+            _errorMessage = $"Error deleting account: {exception.Message}";
+        }
+    }
+    
+}

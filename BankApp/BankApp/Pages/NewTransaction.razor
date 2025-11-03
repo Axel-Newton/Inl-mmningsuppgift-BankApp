@@ -18,7 +18,7 @@ else
                 <option value="@Guid.Empty">-- Select Account --</option>
                 @foreach (var acc in _accounts)
                 {
-                    <option value="@acc.Id">@acc.Name (@acc.Currency)</option>
+                    <option value="@acc.Id">@acc.Name: @acc.Balance (@acc.Currency)</option>
                 }
             </select>
         </div>
@@ -68,6 +68,8 @@ else
         }
 
         var account = _accounts.FirstOrDefault(a => a.Id == _selectedAccountId);
+        
+        //Felhantering
         if (account == null)
         {
             _errorMessage = "Selected account could not be found.";
@@ -77,6 +79,12 @@ else
         if (_amount <= 0)
         {
             _errorMessage = "Amount must be greater than zero.";
+            return;
+        }
+
+        if (_transactionType == TransactionType.Withdraw && _amount > account.Balance)
+        {
+            _errorMessage = "Can't withdraw more than accounts available balance";
             return;
         }
 
