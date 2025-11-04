@@ -8,10 +8,7 @@
 }
 else
 {
-    @if (!string.IsNullOrEmpty(_errorMessage)) //Skriver ut errormessage
-    {
-        <div class="alert alert-danger">@_errorMessage</div>
-    }
+    
     
     <EditForm Model="_model" OnValidSubmit="OnSubmitAsync">
         <DataAnnotationsValidator/>
@@ -49,16 +46,23 @@ else
             <label>Amount</label>
             <InputNumber TValue="decimal" @bind-Value="_model.Amount" class="form-control"></InputNumber>
         </div>
-
+        
+        @if (!string.IsNullOrEmpty(_errorMessage)) //Skriver ut errormessage om det finns
+        {
+            <div class="alert alert-danger">@_errorMessage</div>
+        }
+        
         <button type="submit" class="btn btn-primary">Transfer</button>
-    </EditForm>
+    </EditForm> 
 
+    
+    
     <EditForm Model="_model" OnInvalidSubmit="OnSubmitAsync"></EditForm>
     <h4>Account</h4>
     <ul>
         @foreach (var account in _accounts)
         {
-            <li>@account.Name - Saldo: @account.Balance</li>
+            <li>@account.Name - Balance: @account.Balance</li>
         }
     </ul>
 }
@@ -86,9 +90,16 @@ else
     {
         _errorMessage = null;
 
-        if (_model.Amount < 0)
+        if (_model.Amount <= 0)
         {
-            _errorMessage = "Transfer amount can't be negative";
+            _errorMessage = "Transfer amount can't be negative or zero";
+            StateHasChanged();
+            return;
+        }
+
+        if (_model.FromAccountId == _model.ToAccountId)
+        {
+            _errorMessage = "Can't transfer to the same account";
             StateHasChanged();
             return;
         }
