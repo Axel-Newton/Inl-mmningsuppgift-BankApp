@@ -147,35 +147,4 @@ else
         };
         return sortedList;
     }
-    /*
-    protected override void OnInitialized()
-    {
-        var accounts = AccountService.GetAccounts();
-        _transactions = accounts
-            .SelectMany(acc => acc.Transactions.Select(t => new TransactionDisplayModel
-            {
-                Time = t.TimeStamp,
-                Type = t.TransactionType,
-                AccountName = acc.Name,
-                Amount = t.Amount,
-                Currency = acc.Currency,
-                AmountAfter = acc.Balance,
-                ToAccount = t.ToAccountId
-                
-               
-            }))
-            .OrderByDescending(t => t.Time)
-            .ToList();
-    }
-
-    private class TransactionDisplayModel
-    {
-        public DateTime Time { get; set; }
-        public TransactionType Type { get; set; }
-        public string AccountName { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
-        public string Currency { get; set; } = string.Empty;
-        public decimal AmountAfter { get; set; }
-        public Guid? ToAccount { get; set; }
-    }*/
 }

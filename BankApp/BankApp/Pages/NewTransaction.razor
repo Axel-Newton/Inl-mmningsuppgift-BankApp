@@ -51,7 +51,7 @@ else
     private TransactionType _transactionType = TransactionType.Deposit;
     private decimal _amount;
     private string _errorMessage = string.Empty;
-
+    
     protected override async Task OnInitializedAsync()
     {
         _accounts = await AccountService.GetAccountsAsync();
@@ -118,10 +118,10 @@ else
         {
             _errorMessage = exception.Message;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            _errorMessage = "An unexpected error occurred: " + ex.Message;
-            Console.WriteLine(ex);
+            _errorMessage = "An unexpected error occurred: " + exception.Message;
+            Console.WriteLine(exception);
         }
     }
 
