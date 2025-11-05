@@ -17,7 +17,7 @@ else
                      @bind-Value="SelectedAccountId">
             @foreach (var account in _accounts)
             {
-                <option value="@account.Id">@account.Name - Balance: @account.Balance</option>
+                <option value="@account.Id">@account.Name - Balance: @account.Balance @account.Currency</option>
             }
         </InputSelect>
     </div>
@@ -29,6 +29,13 @@ else
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Amount)">
             Sort by amount @(currentKey == SortKey.Amount ? (descending ? "↑" : "↓") : "")
         </button>
+        <InputSelect TValue="TransactionType?" @bind-Value="SelectedTransactionType">
+            <option value="">Choose Transaction Type:</option>
+            @foreach (var type in Enum.GetValues<TransactionType>())
+            {
+                <option value="@type">@type</option>
+            }
+        </InputSelect>
     </div>
     
     @if (_selectedAccount == null || !_selectedAccount.Transactions.Any())
@@ -49,7 +56,7 @@ else
             </thead>
             
             <tbody>
-                @foreach (var transaction in sortedTransaction())
+                @foreach (var transaction in SortedTransaction())
                 {
                     <tr>
                         <td>@transaction.TimeStamp.ToLocalTime().ToString("yyyy-M-d dddd")</td>
@@ -80,7 +87,7 @@ else
     private List<IBankAccount> _accounts = new();
     private IBankAccount? _selectedAccount;
     private Guid _selectedAccountId;
-
+    private TransactionType? SelectedTransactionType { get; set;}
 
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
@@ -128,13 +135,19 @@ else
         }
     }
 
-    private IEnumerable<Transaction> sortedTransaction()
+    private IEnumerable<Transaction> SortedTransaction()
     {
         if (_selectedAccount == null)
             return Enumerable.Empty<Transaction>();
         
         //sortera lista. Datum och belopp
         var sortedList = _selectedAccount.Transactions.AsEnumerable();
+
+        if (SelectedTransactionType.HasValue)
+        {
+            sortedList = sortedList.Where(t => t.TransactionType == SelectedTransactionType.Value);
+        }
+        
         sortedList = currentKey switch
         {
             SortKey.Amount => (descending
