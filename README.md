@@ -50,3 +50,11 @@ A simple Blazor WebAssemby banking app for creating accounts, transactions in th
 - Press the transfer button
 
 ## Credits
+### Technologies used:
+- C# with .Net (Blazor WebAssembly)
+- HTML/CSS and Bootstrap
+- JavaScript interop (IJSRuntime)
+- Dependency injection and scoped services
+- Domain-driven classes (models: BankAccount, Transaction, enums)
+- JetBrains Rider 2025.2.2.1 (IDE) on macOS
+- Git / Github for source control and project hosting
