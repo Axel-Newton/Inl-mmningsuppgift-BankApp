@@ -21,7 +21,7 @@ A simple Blazor WebAssemby banking app for creating accounts, transactions in th
 1. Run the app:
     ```bash
    dotnet run --project BankApp
-2. Open the URL printed in console
+2. Open the URL printed in console (usually https://localhost:5001 or http://localhost:5000)
 
 ## How to use 
 ### Create account
