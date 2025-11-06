@@ -38,6 +38,15 @@ else
         </InputSelect>
     </div>
     
+    <div class="mb-2">
+        <label>From</label>
+        <input class="form-select" type="datetime-local" @bind="StartDate" style="width: 200px"/>
+        <label>To</label>
+        <input class="form-select" type="datetime-local" @bind="EndDate" style="width: 200px;"/>
+        <button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>
+        <button class="btn btn-sm btn-secondary" @onclick="ClearDateFilter">Clear</button>
+    </div>
+    
     @if (_selectedAccount == null || !_selectedAccount.Transactions.Any())
     {
         <p>No transactions yet!</p>
@@ -89,6 +98,9 @@ else
     private Guid _selectedAccountId;
     private TransactionType? SelectedTransactionType { get; set;}
 
+    private DateTime? StartDate { get; set; }
+    private DateTime? EndDate { get; set; }
+    
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
     
@@ -140,12 +152,24 @@ else
         if (_selectedAccount == null)
             return Enumerable.Empty<Transaction>();
         
-        //sortera lista. Datum och belopp
+        //Sortera lista. Datum och belopp
         var sortedList = _selectedAccount.Transactions.AsEnumerable();
 
         if (SelectedTransactionType.HasValue)
         {
             sortedList = sortedList.Where(t => t.TransactionType == SelectedTransactionType.Value);
+        }
+
+        if (StartDate.HasValue)
+        {
+            var startLocal = StartDate.Value;
+            sortedList = sortedList.Where(t => t.TimeStamp.ToLocalTime() >= startLocal);
+        }
+        
+        if (EndDate.HasValue)
+        {
+            var endLocal = EndDate.Value;
+            sortedList = sortedList.Where(t => t.TimeStamp.ToLocalTime() <= endLocal);
         }
         
         sortedList = currentKey switch
@@ -159,5 +183,17 @@ else
             _ => sortedList
         };
         return sortedList;
+    }
+
+    private void ApplyDateFilter()
+    {
+        StateHasChanged();
+    }
+
+    private void ClearDateFilter()
+    {
+        StartDate = null;
+        EndDate = null; 
+        StateHasChanged();
     }
 }
