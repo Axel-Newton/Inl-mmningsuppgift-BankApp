@@ -28,14 +28,27 @@ else
             <select id="type" class="form-control" @bind="_transactionType">
                 <option value="@TransactionType.Deposit">Deposit</option>
                 <option value="@TransactionType.Withdraw">Withdraw</option>
+                <option value="@TransactionType.Interest">Apply Interest</option>
             </select>
         </div>
-
-        <div class="form-group mb-3">
-            <label for="amount">Amount:</label>
-            <input id="amount" class="form-control" @bind="_amount" type="number" step="0.01"/>
-        </div>
         
+        @if (_transactionType == TransactionType.Interest)
+        {
+            <div class="form-group mb-3">
+                <label for="rate">Interest rate (%)</label>
+                <input id="rate" class="form-control" type="number" @bind="_interestRate"/>
+            </div>
+            <div class="form-group mb-3">
+                <small>Amount will be calculated after current balance and interest rate</small>
+            </div>
+        }
+        else
+        {
+            <div class="form-group mb-3">
+                <label for="amount">Amount:</label>
+                <input id="amount" class="form-control" @bind="_amount" type="number" step="0.01"/>
+            </div>
+        }
         <div class="form-group mb-3">
             <label for="description">Description:</label>
             <select id="description" class="form-select" @bind="_description">
@@ -63,6 +76,7 @@ else
     private decimal _amount;
     private string _errorMessage = string.Empty;
     private string? _description;
+    private decimal _interestRate;
     
     protected override async Task OnInitializedAsync()
     {
@@ -88,42 +102,67 @@ else
             return;
         }
 
-        if (_amount <= 0)
-        {
-            _errorMessage = "Amount must be greater than zero.";
-            return;
-        }
+        decimal amountToApply;
 
-        if (_transactionType == TransactionType.Withdraw && _amount > account.Balance)
+        if (_transactionType == TransactionType.Interest)
         {
-            _errorMessage = "Can't withdraw more than accounts available balance";
-            return;
+            if (_interestRate <= 0)
+            {
+                _errorMessage = "Interest rate has to be more than 0";
+                return;
+            }
+            
+            //Calculate interest
+            amountToApply = Math.Round(account.Balance * (_interestRate / 100m), 2);
+            if (amountToApply == 0)
+            {
+                _errorMessage = "Calculated interest amount is 0";
+                return;
+            }
+        }
+        else
+        {
+            if (_amount <= 0)
+            {
+                _errorMessage = "Amount must be greater than zero.";
+                return;
+            }
+            
+            if (_transactionType == TransactionType.Withdraw && _amount > account.Balance)
+            {
+                _errorMessage = "Can't withdraw more than accounts available balance";
+                return;
+            }
+
+            amountToApply = _amount;
         }
 
         var description = string.IsNullOrWhiteSpace(_description) //Faller tillbaka till deposit eller withdraw BARA om det inte finns någon description vald
-            ? (_transactionType == TransactionType.Deposit ? "Deposit" : "Withdraw")
+            ? (_transactionType == TransactionType.Deposit ? "Deposit" :
+                _transactionType == TransactionType.Withdraw ? "Withdraw" :
+                _transactionType == TransactionType.Interest ? "Interest" : "Transaction")
             : _description;
         
         try
         {
-            if (_transactionType == TransactionType.Deposit)
+            if (_transactionType == TransactionType.Deposit || _transactionType == TransactionType.Interest)
             {
                 account.Deposit(
-                    _amount,
+                    amountToApply,
                     toAccountId: account.Id,
                     fromAccountId: Guid.Empty,
                     description: description,
-                    transactionType: TransactionType.Deposit
+                    transactionType: _transactionType
                 );
             }
             else
             {
                 account.Withdraw(
-                    _amount,
+                    amountToApply,
                     toAccountId: Guid.Empty,
                     fromAccountId: account.Id,
                     description: description,
-                    transactionType: TransactionType.Withdraw
+                    transactionType: _transactionType
                 );
             }
 
