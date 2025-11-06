@@ -3,52 +3,55 @@
 @inject IAccountService AccountService
 
 <h3>Please create an account</h3>
-<EditForm Model="_model" OnValidSubmit="CreateAccountAsync">
-    <DataAnnotationsValidator/>
-    <ValidationSummary />
-    <div className="mb-2">
-        <label>Account Name</label>
-        <InputText @bind-Value="_model.Name"/>
-    </div>
-    <div className="mb-2">
-        <label>Account Type</label>
-        <InputSelect @bind-Value="_model.AccountType">
-            <option value="">Choose Account Type:</option>
-            <option value="@AccountType.Deposit">Base Account</option>
-            <option value="@AccountType.Savings">Savings Account</option>
-        </InputSelect>
-    </div>
+<div class="card p-4">
+    <EditForm Model="_model" OnValidSubmit="CreateAccountAsync">
+        <DataAnnotationsValidator/>
+        <ValidationSummary />
+        
+        <div class="form-group mb3">
+            <label>Account Name</label>
+            <InputText @bind-Value="_model.Name" class="form-control"/>
+        </div>
+        
+        <div class="mb-2">
+            <label>Account Type</label>
+            <InputSelect @bind-Value="_model.AccountType" class="form-select" TValue="AccountType">
+                <option value="">Choose Account Type:</option>
+                <option value="@AccountType.Deposit">Base Account</option>
+                <option value="@AccountType.Savings">Savings Account</option>
+            </InputSelect>
+        </div>
 
-    <div className="mb-2">
-        <label>Currency</label>
-        <InputSelect @bind-Value="_model.Currency">
-            <option value="">Choose Currency:</option>
-            @foreach (var currency in _currencies)
-            {
-                <option value="@currency">@currency</option>
-            }
-        </InputSelect>
-    </div>
+        <div className="mb-2">
+            <label>Currency</label>
+            <InputSelect class="form-select"@bind-Value="_model.Currency">
+                <option value="">Choose Currency:</option>
+                @foreach (var currency in _currencies)
+                {
+                    <option value="@currency">@currency</option>
+                }
+            </InputSelect>
+        </div>
 
-    <div className="mb-2">
-        <label>Start Balance</label>
-        <InputNumber @bind-Value="_model.InitialBalance"></InputNumber>
-    </div>
+        <div className="mb-2"> 
+            <label>Start Balance</label>
+            <InputNumber class="form-control" @bind-Value="_model.InitialBalance"></InputNumber>
+        </div>
 
-    <button type="submit">Create Account</button>
-</EditForm>
+        <button class="btn btn-secondary" style="margin-top:10px; margin-bottom: 10px; width: 100%">Create Account</button>
+    </EditForm>
 
-<button class="btn btn-primary" @onclick="GetAccountsAsync">Get Accounts</button>
+    <button class="btn btn-primary" @onclick="GetAccountsAsync">Get Accounts</button>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger mt-2">@errorMessage</div>  //Skriver ut error message om det finns
-}
-@if (!string.IsNullOrEmpty(successMessage)) 
-{
-    <div class="alert alert-success mt-2">@successMessage</div> //Skriver ut success message om det finns
-}
-
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-2">@errorMessage</div>  //Skriver ut error message om det finns
+    }
+    @if (!string.IsNullOrEmpty(successMessage)) 
+    {
+        <div class="alert alert-success mt-2">@successMessage</div> //Skriver ut success message om det finns
+    }
+</div>
 <h4>All Accounts</h4>
 
 @if (_showAccounts)
@@ -85,7 +88,7 @@
 @code{
     private readonly CreateAccountModel _model = new();
 
-    private readonly List<string> _currencies = new() { "SEK", "USD", "EURO" };
+    private readonly List<string> _currencies = new() { "SEK"};
 
     private bool _showAccounts = false;
     private List<IBankAccount> accountsList = new();
@@ -105,21 +108,35 @@
         successMessage = string.Empty;
         try
         {
-            await AccountService.CreateAccountAsync(
-                _model.Name,
-                _model.AccountType,
-                _model.Currency,
-                _model.InitialBalance);
+            //Felhantering
+            if (string.IsNullOrEmpty(_model.Name))
+            {
+                errorMessage = "Name can not be null";
+            }
 
-            _model.Clear();
-            successMessage = "Account created successfully.";
+            if (_model.InitialBalance <= 0)
+            {
+                errorMessage = "Balance has to be greater than zero";
+            }
+            
+            else
+            {
+                await AccountService.CreateAccountAsync(
+                    _model.Name,
+                    _model.AccountType,
+                    _model.Currency,
+                    _model.InitialBalance);
 
-            // Refreshar displayade konton
-            await GetAccountsAsync();
+                _model.Clear();
+                successMessage = "Account created successfully.";
+
+                // Refreshar displayade konton
+                await GetAccountsAsync();
+            }
         }
         catch (Exception exception)
         {
-            // visar error till användaren istället för rethrow
+            // visar error till användaren
             errorMessage = $"Unable to create account: {exception.Message}";
             Console.WriteLine(exception);
         }

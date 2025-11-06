@@ -24,6 +24,19 @@ a, .btn-link {
     padding-top: 1.1rem;
 }
 
+.nav-item .nav-link {
+    display: flex;
+    align-items: center; /* vertically center icon and text */
+    gap: 0.5rem;         /* spacing between icon and label */
+}
+
+.nav-item .nav-link .bi {
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
+    font-size: 1.5rem; /* adjust size if needed */
+}
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }

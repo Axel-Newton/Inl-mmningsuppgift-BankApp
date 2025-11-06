@@ -17,9 +17,18 @@ else
                      @bind-Value="SelectedAccountId">
             @foreach (var account in _accounts)
             {
-                <option value="@account.Id">@account.Name - Balance: @account.Balance</option>
+                <option value="@account.Id">@account.Name - Balance: @account.Balance @account.Currency</option>
             }
         </InputSelect>
+    </div>
+    
+    <div class="mb-2">
+        <label>From</label>
+        <input class="form-select" type="datetime-local" @bind="StartDate" style="width: 200px"/>
+        <label>To</label>
+        <input class="form-select" type="datetime-local" @bind="EndDate" style="width: 200px;"/>
+        <button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>
+        <button class="btn btn-sm btn-secondary" @onclick="ClearDateFilter">Clear</button>
     </div>
     
     <div class="mb-2">
@@ -29,6 +38,13 @@ else
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Amount)">
             Sort by amount @(currentKey == SortKey.Amount ? (descending ? "↑" : "↓") : "")
         </button>
+        <InputSelect TValue="TransactionType?" @bind-Value="SelectedTransactionType">
+            <option value="">Choose Transaction Type:</option>
+            @foreach (var type in Enum.GetValues<TransactionType>())
+            {
+                <option value="@type">@type</option>
+            }
+        </InputSelect>
     </div>
     
     @if (_selectedAccount == null || !_selectedAccount.Transactions.Any())
@@ -44,18 +60,20 @@ else
                 <th>Amount</th>
                 <th>TransactionType</th>
                 <th>Balance after</th>
+                <th>Description</th>
                 <th>From - To</th>
             </tr>
             </thead>
             
             <tbody>
-                @foreach (var transaction in sortedTransaction())
+                @foreach (var transaction in SortedTransaction())
                 {
                     <tr>
                         <td>@transaction.TimeStamp.ToLocalTime().ToString("yyyy-M-d dddd")</td>
                         <td>@transaction.Amount</td>
                         <td>@transaction.TransactionType</td>
                         <td>@transaction.BalanceAfter</td>
+                        <td>@transaction.Description</td>
                         <td>
                             @if (transaction.FromAccountId.HasValue && transaction.ToAccountId.HasValue)
                             {
@@ -80,8 +98,11 @@ else
     private List<IBankAccount> _accounts = new();
     private IBankAccount? _selectedAccount;
     private Guid _selectedAccountId;
+    private TransactionType? SelectedTransactionType { get; set;}
 
-
+    private DateTime? StartDate { get; set; }
+    private DateTime? EndDate { get; set; }
+    
     private SortKey currentKey = SortKey.Date;
     private bool descending = true;
     
@@ -128,13 +149,31 @@ else
         }
     }
 
-    private IEnumerable<Transaction> sortedTransaction()
+    private IEnumerable<Transaction> SortedTransaction()
     {
         if (_selectedAccount == null)
             return Enumerable.Empty<Transaction>();
         
-        //sortera lista. Datum och belopp
+        //Sortera lista. Datum och belopp
         var sortedList = _selectedAccount.Transactions.AsEnumerable();
+
+        if (SelectedTransactionType.HasValue)
+        {
+            sortedList = sortedList.Where(t => t.TransactionType == SelectedTransactionType.Value);
+        }
+
+        if (StartDate.HasValue)
+        {
+            var startLocal = StartDate.Value;
+            sortedList = sortedList.Where(t => t.TimeStamp.ToLocalTime() >= startLocal);
+        }
+        
+        if (EndDate.HasValue)
+        {
+            var endLocal = EndDate.Value;
+            sortedList = sortedList.Where(t => t.TimeStamp.ToLocalTime() <= endLocal);
+        }
+        
         sortedList = currentKey switch
         {
             SortKey.Amount => (descending
@@ -147,35 +186,16 @@ else
         };
         return sortedList;
     }
-    /*
-    protected override void OnInitialized()
+
+    private void ApplyDateFilter()
     {
-        var accounts = AccountService.GetAccounts();
-        _transactions = accounts
-            .SelectMany(acc => acc.Transactions.Select(t => new TransactionDisplayModel
-            {
-                Time = t.TimeStamp,
-                Type = t.TransactionType,
-                AccountName = acc.Name,
-                Amount = t.Amount,
-                Currency = acc.Currency,
-                AmountAfter = acc.Balance,
-                ToAccount = t.ToAccountId
-                
-               
-            }))
-            .OrderByDescending(t => t.Time)
-            .ToList();
+        StateHasChanged();
     }
 
-    private class TransactionDisplayModel
+    private void ClearDateFilter()
     {
-        public DateTime Time { get; set; }
-        public TransactionType Type { get; set; }
-        public string AccountName { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
-        public string Currency { get; set; } = string.Empty;
-        public decimal AmountAfter { get; set; }
-        public Guid? ToAccount { get; set; }
-    }*/
+        StartDate = null;
+        EndDate = null; 
+        StateHasChanged();
+    }
 }

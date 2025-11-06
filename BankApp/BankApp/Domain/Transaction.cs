@@ -16,7 +16,7 @@
         public decimal Amount { get; set; }
         public DateTime TimeStamp { get; set; }
         public TransactionType TransactionType { get; set; } 
-        public string Description { get; set; } = string.Empty;
+        public string? Description { get; set; } 
         public decimal BalanceAfter { get; set; }
         
         //Parametarlös konstruktor för JSON deserialization

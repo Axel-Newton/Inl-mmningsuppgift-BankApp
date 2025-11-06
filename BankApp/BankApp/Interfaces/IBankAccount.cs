@@ -11,6 +11,7 @@ public interface IBankAccount
     string Currency { get; }
     decimal Balance { get; }
     DateTime LastUpdated { get; }
+    string Description { get; }
     TransactionType TransactionType { get; }
     List<Transaction> Transactions { get; }
     

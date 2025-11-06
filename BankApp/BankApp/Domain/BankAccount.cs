@@ -14,6 +14,7 @@ public class BankAccount : IBankAccount
     public string Currency { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public DateTime LastUpdated { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     // Parameterless constructor for JSON deserialization
     public BankAccount()
