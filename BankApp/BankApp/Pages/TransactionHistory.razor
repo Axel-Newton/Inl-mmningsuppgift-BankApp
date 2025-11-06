@@ -23,6 +23,15 @@ else
     </div>
     
     <div class="mb-2">
+        <label>From</label>
+        <input class="form-select" type="datetime-local" @bind="StartDate" style="width: 200px"/>
+        <label>To</label>
+        <input class="form-select" type="datetime-local" @bind="EndDate" style="width: 200px;"/>
+        <button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>
+        <button class="btn btn-sm btn-secondary" @onclick="ClearDateFilter">Clear</button>
+    </div>
+    
+    <div class="mb-2">
         <button class="btn btn-sm" @onclick="() => SetSort(SortKey.Date)">
             Sort by date @(currentKey == SortKey.Date ? (descending ? "↑" : "↓") : "")
         </button>
@@ -38,15 +47,6 @@ else
         </InputSelect>
     </div>
     
-    <div class="mb-2">
-        <label>From</label>
-        <input class="form-select" type="datetime-local" @bind="StartDate" style="width: 200px"/>
-        <label>To</label>
-        <input class="form-select" type="datetime-local" @bind="EndDate" style="width: 200px;"/>
-        <button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>
-        <button class="btn btn-sm btn-secondary" @onclick="ClearDateFilter">Clear</button>
-    </div>
-    
     @if (_selectedAccount == null || !_selectedAccount.Transactions.Any())
     {
         <p>No transactions yet!</p>
@@ -60,6 +60,7 @@ else
                 <th>Amount</th>
                 <th>TransactionType</th>
                 <th>Balance after</th>
+                <th>Description</th>
                 <th>From - To</th>
             </tr>
             </thead>
@@ -72,6 +73,7 @@ else
                         <td>@transaction.Amount</td>
                         <td>@transaction.TransactionType</td>
                         <td>@transaction.BalanceAfter</td>
+                        <td>@transaction.Description</td>
                         <td>
                             @if (transaction.FromAccountId.HasValue && transaction.ToAccountId.HasValue)
                             {
