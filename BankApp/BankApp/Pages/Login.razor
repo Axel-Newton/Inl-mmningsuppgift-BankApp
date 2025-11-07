@@ -1,0 +1,110 @@
+﻿@page "/Login"
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@layout LoginLayout
+<h3>Login</h3>
+
+@if (!_isInitialized)
+{
+    <p>Loading..</p>
+}
+else if(!_isRegistered)
+{
+    <div class="mb-2">
+        <label>Please Create a 4-digit PIN:</label>
+        <InputText class="form-control" type="number" @bind-Value="_newUserPin"></InputText>
+    </div>
+    <button class="btn btn-primary" @onclick="CreatePinAsync">Create PIN</button>
+    
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="mb-2">@_message</div>
+    }
+}
+else
+{
+    <div class="mb-2">
+        <label>Enter PIN code:</label>
+        <InputText class="form-control" @bind-Value="_userPin"></InputText>
+    </div>
+    <button class="btn btn-primary" @onclick="LoginAsync">Login</button>
+    <button class="btn btn-secondary" @onclick="ResetPinAsync">Reset PIN</button>
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <div class="mb-2">@_message</div>
+    }
+}
+@code {
+    private string _newUserPin = string.Empty;
+    private string _userPin = string.Empty;
+    private bool _isInitialized;
+    private bool _isRegistered;
+    private string _storedPin;
+    private string _message = String.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _storedPin = await JS.InvokeAsync<string>("localStorage.getItem", "bank_pin");
+        _isRegistered = !string.IsNullOrEmpty(_storedPin); //Kollar om det redan finns en pinkod
+        _isInitialized = true;
+    }
+
+    private async Task CreatePinAsync()
+    {
+        _message = string.Empty;
+        if (string.IsNullOrEmpty(_newUserPin))
+        {
+            _message = "PIN has to be entered";
+            return;
+        }
+
+        if (!_newUserPin.All(char.IsDigit))
+        {
+            _message = "Pin can only contain numbers";
+            return;
+        }
+        if (_newUserPin.Length != 4)
+        {
+            _message = "PIN has to be 4 digits";
+            return;
+        }
+
+        _storedPin = _newUserPin;
+        await JS.InvokeVoidAsync("localStorage.setItem", "bank_pin", _storedPin);
+        _isRegistered = true;
+        _newUserPin = String.Empty;
+        _message = "PIN succesfully created!";
+    }
+
+    private async Task ResetPinAsync()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "bank_pin");
+        _storedPin = null;
+        _isRegistered = false;
+        _message = "PIN succesfully reset. Please create a new one.";
+    }
+    
+    private Task LoginAsync()
+    {
+        _message = string.Empty;
+        if (string.IsNullOrEmpty(_userPin))
+        {
+            _message = "Enter your existing PIN";
+            return Task.CompletedTask;
+        }
+        
+        if (_userPin == _storedPin)
+        {
+            _message = "Successfully logged in";
+            Navigation.NavigateTo($"/");
+        }
+        else
+        {
+            _message = "Wrong PIN";
+        }
+
+        _userPin = string.Empty;
+        return Task.CompletedTask;
+    }
+    
+}

@@ -1,5 +1,7 @@
 ﻿@page "/"
 @inject IAccountService AccountService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 <PageTitle>Home</PageTitle>
 
 <h1>Home</h1>
@@ -47,6 +49,14 @@
     
     protected override async Task OnInitializedAsync()
     {
+        //Navigerar till Login om användaren ej är inloggad
+        var storedPin = await JS.InvokeAsync<string>("localStorage.getItem", "bank_pin");
+        if (string.IsNullOrEmpty(storedPin))
+        {
+            Navigation.NavigateTo("/Login", true);
+            return;
+        }
+        
         _accountsList = await AccountService.GetAccountsAsync();
     }
     

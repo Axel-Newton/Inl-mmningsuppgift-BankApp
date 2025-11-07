@@ -24,6 +24,7 @@ A simple Blazor WebAssemby banking app for creating accounts, transactions in th
 2. Open the URL printed in console (usually https://localhost:5001 or http://localhost:5000)
 
 ## How to use 
+- Create PIN code and log in
 ### Create account
 - Navigate to the 'Create Acount' tab in the navigation menu to the left of the screen 
 - Input desired account name, type, currency and start balance 
@@ -32,7 +33,7 @@ A simple Blazor WebAssemby banking app for creating accounts, transactions in th
 ### Make a transaction
 - Navigate to the 'New Transaction' tab in the navigation menu 
 - Select account using the drop-down menu
-- Select transaction type (Deposit, Withdraw)
+- Select transaction type (Deposit, Withdraw, Apply Interest)
 - Input the desired amount
 - Choose description (Optional), if no description is chosen it will automatically be set to the transaction type
 - Press the submit button
