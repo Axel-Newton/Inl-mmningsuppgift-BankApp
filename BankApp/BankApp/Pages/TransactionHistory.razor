@@ -27,7 +27,7 @@ else
         <input class="form-select" type="datetime-local" @bind="StartDate" style="width: 200px"/>
         <label>To</label>
         <input class="form-select" type="datetime-local" @bind="EndDate" style="width: 200px;"/>
-        <button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>
+        <!--<button class="btn btn-sm btn-primary" @onclick="ApplyDateFilter">Apply</button>-->
         <button class="btn btn-sm btn-secondary" @onclick="ClearDateFilter">Clear</button>
     </div>
     
@@ -94,7 +94,6 @@ else
 
 
 @code {
-    //private List<TransactionDisplayModel> _transactions = new();
     private List<IBankAccount> _accounts = new();
     private IBankAccount? _selectedAccount;
     private Guid _selectedAccountId;
@@ -186,12 +185,13 @@ else
         };
         return sortedList;
     }
-
+    
+    /*
     private void ApplyDateFilter()
     {
         StateHasChanged();
     }
-
+    */
     private void ClearDateFilter()
     {
         StartDate = null;
