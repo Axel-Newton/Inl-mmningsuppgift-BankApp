@@ -16,7 +16,8 @@ public class BankAccount : IBankAccount
     public DateTime LastUpdated { get; set; }
     public string Description { get; set; } = string.Empty;
 
-    // Parameterless constructor for JSON deserialization
+    
+    // Parametarlös konstruktor för JSON deserialization
     public BankAccount()
     {
     }
@@ -37,7 +38,7 @@ public class BankAccount : IBankAccount
         Balance -= amount;
         LastUpdated = DateTime.Now;
 
-        var tx = new Transaction(
+        var newWithdrawal = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
@@ -49,7 +50,7 @@ public class BankAccount : IBankAccount
             BalanceAfter = Balance
         };
 
-        Transactions.Add(tx);
+        Transactions.Add(newWithdrawal);
     }
 
     public void Deposit(decimal amount, Guid toAccountId, Guid fromAccountId, string description,
@@ -59,7 +60,7 @@ public class BankAccount : IBankAccount
         Balance += amount;
         LastUpdated = DateTime.Now;
 
-        var tx = new Transaction(
+        var newDeposit = new Transaction(
             fromAccountId,
             toAccountId,
             amount,
@@ -71,14 +72,14 @@ public class BankAccount : IBankAccount
             BalanceAfter = Balance
         };
 
-        Transactions.Add(tx);
+        Transactions.Add(newDeposit);
     }
 
     public void TransferTo(BankAccount toAccount, decimal amount)
     {
         Balance -= amount;
         LastUpdated = DateTime.Now;
-        var txOut = new Transaction
+        var newTransferOut = new Transaction
         (
             Id,
             toAccount.Id,
@@ -90,11 +91,11 @@ public class BankAccount : IBankAccount
         {
             BalanceAfter = Balance
         };
-        Transactions.Add(txOut);
+        Transactions.Add(newTransferOut);
 
         toAccount.Balance += amount;
         toAccount.LastUpdated = DateTime.UtcNow;
-        var txIn = new Transaction(
+        var newTransferIn = new Transaction(
             Id,
             toAccount.Id,
             amount,
@@ -105,22 +106,6 @@ public class BankAccount : IBankAccount
         {
             BalanceAfter = toAccount.Balance
         };
-        toAccount.Transactions.Add(txIn);
-
-        /*
-        public void TransferTo(BankAccount toAccount, decimal amount)
-        {
-            Balance -= amount;
-            LastUpdated = DateTime.Now;
-            _transactions.Add(new Transaction
-            {
-                TransactionType = TransactionType.TransferOut,
-                Amount = amount,
-                BalanceAfter = Balance,
-                FromAccountId = Id,
-                ToAccountId = toAccount.Id
-            });
-        }
-        */
+        toAccount.Transactions.Add(newTransferIn);
     }
 }

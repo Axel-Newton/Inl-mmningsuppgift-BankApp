@@ -5,7 +5,8 @@
         Deposit,
         Withdraw,
         TransferIn,
-        TransferOut
+        TransferOut,
+        Interest
     }
     
     public class Transaction
